@@ -21,7 +21,16 @@ declare module "react-native-twilio-video-webrtc" {
     // Audio-specific configs can be added here
   }
 
+  // Updated TrackPublication interface to match native implementation
   export interface TrackPublication {
+    trackName: string;
+    enabled: boolean;
+    type: "audio" | "video";
+  }
+
+  // Interface for remote tracks (these have trackSid)
+  export interface RemoteTrackPublication {
+    trackSid: string;
     trackName: string;
     enabled: boolean;
     type: "audio" | "video";
@@ -121,6 +130,20 @@ declare module "react-native-twilio-video-webrtc" {
 
   export type LocalParticipantSupportedCodecsCb = (d: LocalParticipantSupportedCodecsCbEventArgs) => void;
 
+  // New event types for multiple track support
+  export interface TrackCreatedEventArgs {
+    trackName: string;
+    trackSid?: string; // Optional since local tracks might not have sid until published
+    enabled: boolean;
+  }
+
+  export interface TrackErrorEventArgs {
+    error: string;
+  }
+
+  export type TrackCreatedEventCb = (t: TrackCreatedEventArgs) => void;
+  export type TrackErrorEventCb = (t: TrackErrorEventArgs) => void;
+
   export type TwilioVideoProps = ViewProps & {
     onCameraDidStart?: () => void;
     onCameraDidStopRunning?: (err: any) => void;
@@ -146,6 +169,14 @@ declare module "react-native-twilio-video-webrtc" {
 
     onStatsReceived?: (data: any) => void;
     onDataTrackMessageReceived?: DataTrackEventCb;
+    
+    // New events for multiple track support
+    onAudioTrackCreated?: TrackCreatedEventCb;
+    onVideoTrackCreated?: TrackCreatedEventCb;
+    onTrackCreationError?: TrackErrorEventCb;
+    onTrackPublishError?: TrackErrorEventCb;
+    onTrackUnpublishError?: TrackErrorEventCb;
+    
     // iOS only
     autoInitializeCamera?: boolean;    
     ref?: React.Ref<any>;
