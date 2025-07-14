@@ -7,6 +7,26 @@ declare module "react-native-twilio-video-webrtc" {
     videoTrackSid: string;
   }
 
+  // New interfaces for multiple track support
+  export interface LocalTrackConfig {
+    trackName: string;
+    enabled?: boolean;
+  }
+
+  export interface LocalVideoTrackConfig extends LocalTrackConfig {
+    cameraType?: cameraType;
+  }
+
+  export interface LocalAudioTrackConfig extends LocalTrackConfig {
+    // Audio-specific configs can be added here
+  }
+
+  export interface TrackPublication {
+    trackName: string;
+    enabled: boolean;
+    type: "audio" | "video";
+  }
+
   type scaleType = "fit" | "fill";
   type cameraType = "front" | "back";
 
@@ -23,6 +43,7 @@ declare module "react-native-twilio-video-webrtc" {
 
   interface TwilioVideoLocalViewProps extends ViewProps {
     enabled: boolean;
+    trackName?: string; // Optional track name for multiple track support
     ref?: React.Ref<any>;
     scaleType?: scaleType;
     /**
@@ -162,8 +183,6 @@ declare module "react-native-twilio-video-webrtc" {
   };
 
   class TwilioVideo extends React.Component<TwilioVideoProps> {
-    setLocalVideoEnabled: (enabled: boolean) => Promise<boolean>;
-    setLocalAudioEnabled: (enabled: boolean) => Promise<boolean>;
     setRemoteAudioEnabled: (enabled: boolean) => Promise<boolean>;
     setBluetoothHeadsetConnected: (enabled: boolean) => Promise<boolean>;
     connect: (options: iOSConnectParams | androidConnectParams) => void;
@@ -171,10 +190,18 @@ declare module "react-native-twilio-video-webrtc" {
     flipCamera: () => void;
     toggleSoundSetup: (speaker: boolean) => void;
     getStats: () => void;
-    publishLocalAudio: () => void;
-    unpublishLocalAudio: () => void;
-    publishLocalVideo: () => void;
-    unpublishLocalVideo: () => void;
+    
+    // Multiple track methods
+    createLocalAudioTrack: (config: LocalAudioTrackConfig) => Promise<string>;
+    createLocalVideoTrack: (config: LocalVideoTrackConfig) => Promise<string>;
+    publishLocalAudioTrack: (trackName: string) => Promise<boolean>;
+    publishLocalVideoTrack: (trackName: string) => Promise<boolean>;
+    unpublishLocalAudioTrack: (trackName: string) => Promise<boolean>;
+    unpublishLocalVideoTrack: (trackName: string) => Promise<boolean>;
+    destroyLocalTrack: (trackName: string) => Promise<boolean>;
+    enableLocalTrack: (trackName: string, enabled: boolean) => Promise<boolean>;
+    getLocalTracks: () => Promise<TrackPublication[]>;
+    
     sendString: (message: string) => void;
   }
 
